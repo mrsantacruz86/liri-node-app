@@ -2,10 +2,11 @@ require("dotenv").config();
 const keys = require('./keys');
 const inquirer = require('inquirer');
 const request = require('request');
-var Twitter = require('twitter');
+const Twitter = require('twitter');
+var Spotify = require('node-spotify-api');
 
-// var spotify = new Spotify(keys.spotify);
-// var client = new Twitter(keys.twitter);
+var spotify = new Spotify(keys.spotify);
+var client = new Twitter(keys.twitter);
 
 var mainChoise;
 inquirer.prompt([
@@ -33,7 +34,7 @@ function chooseOption(option){
         type: "list",
         name: "searchBy",
         message: "Tell us what kind of search do you want to perform: ",
-        choices: ["Artist(s)", "The song's name", "A preview link of the song from Spotify", "The album that the song is from"]
+        choices: ["album","artist", "track"]
       },
       {
         type: "input",
@@ -46,6 +47,15 @@ function chooseOption(option){
       searchText = response.searchText;
       console.log("You are going to search songs by: " + searchBy);
       console.log("You are going to search for: " + searchText);
+
+      spotify.search({ type: searchBy, query: searchText }, function(err, data) {
+        if ( err ) {
+            console.log('Error occurred: ' + err);
+            return;
+        }
+          // Do something with 'data'
+          console.log(data); 
+      });
     });
   } 
   //Find a movie from OMDB
@@ -89,7 +99,7 @@ function findMovie(movieName) {
     // If there were no errors and the response code was 200 (i.e. the request was successful)...
     if (!error && response.statusCode === 200) {
 
-      console.log("Here is theinformation we found for that movie...");
+      console.log("Here is the information we found for that movie...");
       console.log("*************************************************");
       console.log("Title: " + JSON.parse(body).Title);
       console.log("Year: " + JSON.parse(body).Year);
