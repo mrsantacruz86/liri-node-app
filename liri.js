@@ -3,10 +3,9 @@ const keys = require('./keys');
 const inquirer = require('inquirer');
 const request = require('request');
 const Twitter = require('twitter');
-var Spotify = require('node-spotify-api');
+const Spotify = require('node-spotify-api');
+const fs = require('fs');
 
-var spotify = new Spotify(keys.spotify);
-var client = new Twitter(keys.twitter);
 
 var mainChoise;
 inquirer.prompt([
@@ -18,6 +17,7 @@ inquirer.prompt([
   }
 ]).then(function(response){
   console.log(response.option);
+  console.log("----------------------------------------------------------------");
   chooseOption(response.option)
 });
 
@@ -37,22 +37,30 @@ function chooseOption(option){
     
     ]).then(function(response){
       songName = response.songName;
-      // console.log("You are going to search for: " + songName);
-      debugger;
-      spotify.search({ type: "track", query: songName, limit:1 }, function(err, data) {
+      //Loads the Spotify API
+      var spotify = new Spotify(keys.spotify);
+
+      spotify.search({ type: "track", query: songName, limit:5 }, function(err, data) {
         if ( err ) {
             console.log('Error occurred: ' + err);
             return;
         }
-          // Do something with 'data'
-          console.log(JSON.stringify(data), null, 2);
-          console.log('This is what we found abouth that song...');
-          console.log("*************************************************");
-          console.log('Artist: ' + artist);
-          console.log('Song Name');
-          console.log('');
-          console.log('');
-          console.log("*************************************************");
+        // Do something with 'data'
+        // console.log(JSON.stringify(data, null, 2));
+        console.log('This is what we found abouth that song...');
+        console.log("----------------------------------------------------------------");
+        data.tracks.items.forEach(function (song, key){
+          console.log("Song #: " + (key + 1));
+          console.log("____________________");
+          console.log('Artist: ' + song.artists[0].name);
+          console.log('Song Name: ' + song.name);
+          console.log('Link: ' + song.external_urls.spotify);
+          console.log('Album: ' + song.album.name);
+          console.log("____________________");
+        })
+        console.log("----------------------------------------------------------------");
+
+
       });
     });
   } 
@@ -73,20 +81,16 @@ function chooseOption(option){
   }
 }
 
-//Thia function retriees the first 20 twits fron Tweeter
+//This function retriees the first 20 twits fron Tweeter
 function findTwitts(){
-  var client = new Twitter({
-    consumer_key: keys.twitter.consumer_key,
-    consumer_secret: keys.twitter.consumer_secret,
-    access_token_key: keys.twitter.access_token_key,
-    access_token_secret: keys.twitter.access_token_secret
-  });
-
-  var params = { screen_name: 'nodejs' };
-  client.get('statuses/user_timeline', params, function (error, tweets, response) {
+  var twitter = new Twitter(keys.twitter);
+  var params = {q: 'adcarballido', count: 20};
+  twitter.get('search/tweets', params, function(error, tweets, response) {
     if (!error) {
-      console.log(tweets);
-    }
+      tweets.statuses.forEach(function (element, key){
+        console.log((key + 1) + ". " + element.text);
+      });
+    }else{console.log(error)}
   });
 }
 
@@ -98,8 +102,7 @@ function findMovie(movieName) {
     if (!error && response.statusCode === 200) {
 
       console.log("Here is the information we found for that movie...");
-      console.log("*************************************************");
-      console.log("Title: " + JSON.parse(body).Title);
+      console.log("----------------------------------------------------------------");      console.log("Title: " + JSON.parse(body).Title);
       console.log("Year: " + JSON.parse(body).Year);
       console.log("IMDB Rating: " + JSON.parse(body).imdbRating);
       console.log("Rotten Tomatoes Rating: " + JSON.parse(body).Ratings[1].Value);
@@ -107,11 +110,7 @@ function findMovie(movieName) {
       console.log("Language: " + JSON.parse(body).Language);
       console.log("Plot: " + JSON.parse(body).Plot);
       console.log("Actors: " + JSON.parse(body).Actors);
-      console.log("*************************************************");
+      console.log("----------------------------------------------------------------");    
     }
   });
-}
-
-function findTweets() {
-  
 }
