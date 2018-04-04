@@ -27,34 +27,32 @@ function chooseOption(option){
     findTwitts();
   } 
   else if(option === "spotify-this-song"){
-    var searchBy;
-    var searchText;
+    var songName;
     inquirer.prompt([
       {
-        type: "list",
-        name: "searchBy",
-        message: "Tell us what kind of search do you want to perform: ",
-        choices: ["album","artist", "track"]
-      },
-      {
         type: "input",
-        name: "searchText",
+        name: "songName",
         message: "Type what you want to search: ",
       }
     
     ]).then(function(response){
-      searchBy = response.searchBy;
-      searchText = response.searchText;
-      console.log("You are going to search songs by: " + searchBy);
-      console.log("You are going to search for: " + searchText);
-
-      spotify.search({ type: searchBy, query: searchText }, function(err, data) {
+      songName = response.songName;
+      // console.log("You are going to search for: " + songName);
+      debugger;
+      spotify.search({ type: "track", query: songName, limit:1 }, function(err, data) {
         if ( err ) {
             console.log('Error occurred: ' + err);
             return;
         }
           // Do something with 'data'
-          console.log(data); 
+          console.log(JSON.stringify(data), null, 2);
+          console.log('This is what we found abouth that song...');
+          console.log("*************************************************");
+          console.log('Artist: ' + artist);
+          console.log('Song Name');
+          console.log('');
+          console.log('');
+          console.log("*************************************************");
       });
     });
   } 
